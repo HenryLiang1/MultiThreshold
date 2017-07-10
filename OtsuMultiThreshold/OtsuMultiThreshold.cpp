@@ -123,8 +123,8 @@ int otsuThreshold(double * histogram) {
 			minVariance = sumOfVariance;
 		}
 
-		cout << mean1 << " : " << mean2 << endl;
-		cout << variance1 << " : " << variance2 << endl;
+		//cout << mean1 << " : " << mean2 << endl;
+		//cout << variance1 << " : " << variance2 << endl;
 	}
 
 	return threshold;
@@ -176,8 +176,8 @@ vector<int> multiThreshold(double * histogram) {
 				W2K += histogram[t3]; //Pi
 				M2K += t3 * histogram[t3]; // i*Pi
 				M2 = M2K / W2K; //(i*Pi)/Pi
-				W3K = 1 - (W0K + W1K + W2K);
-				M3K = MT - (M0K + M1K + M2K);
+				W3K = 1 - (W1K + W2K);
+				M3K = MT - (M1K + M2K);
 
 				M3 = M3K / W3K;
 				currVarB = W0K * (M0 - MT) * (M0 - MT) + W1K * (M1 - MT) * (M1 - MT) + W2K * (M2 - MT) * (M2 - MT) + W3K * (M3 - MT) * (M3 - MT);
@@ -206,9 +206,9 @@ void processMultiThreshold(Mat grayImg) {
 	vector<int> multiThres;
 	Mat TupImg = grayImg.clone();
 	multiThres = multiThreshold(histogram);
-	for (int i = 0; i < multiThres.size(); i++) {
+	/*for (int i = 0; i < multiThres.size(); i++) {
 		cout << "multiThres " << i << " : " << multiThres[i] << endl;
-	}
+	}*/
 
 	for (int r = 0; r < grayImg.rows; r++) {
 		for (int c = 0; c < grayImg.cols; c++) {
@@ -223,7 +223,7 @@ void processMultiThreshold(Mat grayImg) {
 				TupImg.at<uchar>(r, c) = 128;
 			}
 			else if (intensity > multiThres[2]) {
-				TupImg.at<uchar>(r, c) = 256;
+				TupImg.at<uchar>(r, c) = 255;
 			}
 
 		}
@@ -234,31 +234,97 @@ void processMultiThreshold(Mat grayImg) {
 
 }
 
+void calcKmeans(Mat srcImg) {
+	//Mat src = imread("test.jpg");
+	Mat samples(srcImg.rows * srcImg.cols, 3, CV_32F);
+	for (int y = 0; y < srcImg.rows; y++)
+		for (int x = 0; x < srcImg.cols; x++)
+			for (int z = 0; z < 3; z++)
+				samples.at<float>(y + x*srcImg.rows, z) = srcImg.at<Vec3b>(y, x)[z];
+
+
+	int clusterCount = 4;
+	Mat labels;
+	int attempts = 5;
+	Mat centers;
+	kmeans(samples, clusterCount, labels, TermCriteria(CV_TERMCRIT_ITER | CV_TERMCRIT_EPS, 10000, 0.0001), attempts, KMEANS_PP_CENTERS, centers);
+
+
+	Mat new_image(srcImg.size(), srcImg.type());
+	for (int y = 0; y < srcImg.rows; y++)
+		for (int x = 0; x < srcImg.cols; x++)
+		{
+			int cluster_idx = labels.at<int>(y + x*srcImg.rows, 0);
+			new_image.at<Vec3b>(y, x)[0] = centers.at<float>(cluster_idx, 0);
+			new_image.at<Vec3b>(y, x)[1] = centers.at<float>(cluster_idx, 1);
+			new_image.at<Vec3b>(y, x)[2] = centers.at<float>(cluster_idx, 2);
+		}
+	imshow("clustered image", new_image);
+
+}
+
 
 int main()
 {
 	Mat srcImg;
 	Mat grayImg;
 	Mat binImg;
+	Mat leftSrcImg;
 	int thres;
+	vector<int> multiThres;
+
+	string path = "C:/Users/Henry/Desktop/ตุณะ/video/freeway_with_filter.mp4";
+	//"C:/Users/Henry/Documents/video/freeway_with_filter.mp4";
+	//string path = "C:/Users/User/Dropbox/freeway_with_filter.mp4";
+
+
+	VideoCapture capture(path);
+	if (!capture.isOpened()) {
+		cout << "Cannot open video" << endl;
+		system("pause");
+		return -1;
+	}
+
+	Size videoSize = Size((int)capture.get(CV_CAP_PROP_FRAME_WIDTH), (int)capture.get(CV_CAP_PROP_FRAME_HEIGHT));
+	capture.set(CV_CAP_PROP_POS_FRAMES, 0);
+	while (true) {
+		capture >> srcImg;
+		if (srcImg.empty()) {
+			break;
+		}
+		Rect left = Rect(0, videoSize.height / 2, videoSize.width / 2, videoSize.height / 2);
+		cout << leftSrcImg.cols << " : " << leftSrcImg.rows << endl;
+		leftSrcImg = srcImg(left);
+		resize(leftSrcImg, leftSrcImg, Size(800, 600));
+		//Rect rightRect = Rect(0, rightGray.rows / 32 * 9, rightGray.cols / 6 * 5, rightGray.rows / 5 * 2);
+
+		cvtColor(leftSrcImg, grayImg, CV_BGR2GRAY, CV_8UC1);
+
+		//calcKmeans(leftSrcImg);
+
+		getHistogram(grayImg);
+		thres = otsuThreshold(histogram);
+		multiThres = multiThreshold(histogram);
+		processMultiThreshold(grayImg);
+
+
+		//cout << "Threshold 0 = " << multiThres[0] << endl;
+		//cout << "Threshold 1 = " << multiThres[1] << endl;
+		//cout << "Threshold 2 = " << multiThres[2] << endl;
+		threshold(grayImg, binImg, multiThres[1], 255, CV_THRESH_BINARY);
+
+		imshow("Src", leftSrcImg);
+		imshow("Gray", grayImg);
+		imshow("Bin", binImg);
+
+		waitKey(1);
+	}
 	
 
-	srcImg = imread("show.jpg");
-	cvtColor(srcImg, grayImg, CV_BGR2GRAY, CV_8UC1);
+	//srcImg = imread("nightCar.jpg");
+	
 
-	getHistogram(grayImg);
-	thres = otsuThreshold(histogram);
-	processMultiThreshold(grayImg);
-
-
-	cout << "Threshold = " << thres << endl;
-	threshold(grayImg, binImg, thres, 255, CV_THRESH_BINARY);
-
-	imshow("Lena", srcImg);
-	imshow("Gray", grayImg);
-	imshow("Bin", binImg);
-
-	waitKey(0);
+	
 
 	return 0;
 }

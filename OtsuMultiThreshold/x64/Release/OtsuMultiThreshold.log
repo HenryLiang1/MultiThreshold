@@ -1,0 +1,16 @@
+﻿  OtsuMultiThreshold.cpp
+C:\Users\Henry\Documents\MultiThreshold\packages\opencvcontrib.3.1.0\build\native\include\opencv2/core/mat.hpp(1955): warning C4819: The file contains a character that cannot be represented in the current code page (950). Save the file in Unicode format to prevent data loss
+C:\Users\Henry\Documents\MultiThreshold\packages\opencvcontrib.3.1.0\build\native\include\opencv2/core/persistence.hpp : warning C4819: The file contains a character that cannot be represented in the current code page (950). Save the file in Unicode format to prevent data loss
+C:\Users\Henry\Documents\MultiThreshold\packages\opencvcontrib.3.1.0\build\native\include\opencv2/core/utility.hpp : warning C4819: The file contains a character that cannot be represented in the current code page (950). Save the file in Unicode format to prevent data loss
+C:\Users\Henry\Documents\MultiThreshold\packages\opencvcontrib.3.1.0\build\native\include\opencv2/core/utility.hpp : warning C4819: The file contains a character that cannot be represented in the current code page (950). Save the file in Unicode format to prevent data loss
+OtsuMultiThreshold.cpp(123): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+OtsuMultiThreshold.cpp(258): warning C4244: '=': conversion from 'float' to 'uchar', possible loss of data
+OtsuMultiThreshold.cpp(259): warning C4244: '=': conversion from 'float' to 'uchar', possible loss of data
+OtsuMultiThreshold.cpp(260): warning C4244: '=': conversion from 'float' to 'uchar', possible loss of data
+  Generating code
+  4 of 200 functions ( 2.0%) were compiled, the rest were copied from previous compilation.
+    0 functions were new in current compilation
+    1 functions had inline decision re-evaluated but remain unchanged
+  Finished generating code
+  OtsuMultiThreshold.vcxproj -> C:\Users\Henry\Documents\MultiThreshold\x64\Release\OtsuMultiThreshold.exe
+  OtsuMultiThreshold.vcxproj -> C:\Users\Henry\Documents\MultiThreshold\x64\Release\OtsuMultiThreshold.pdb (Full PDB)
